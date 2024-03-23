@@ -41,7 +41,6 @@ setup_logging()
 os.environ["STT_RUNNER"] = "server"
 os.environ["TTS_RUNNER"] = "server"
 
-
 accumulator = Accumulator()
 
 # Configuration for Audio Recording
@@ -70,6 +69,7 @@ send_queue = queue.Queue()
 
 class Device:
     """ """
+
     def __init__(self):
         self.pressed_keys = set()
         self.captured_images = []
@@ -85,7 +85,8 @@ class Device:
         image_path = None
 
         cap = cv2.VideoCapture(camera_index)
-        ret, frame = cap.read()  # Capture a single frame to initialize the camera
+        ret, frame = cap.read(
+        )  # Capture a single frame to initialize the camera
 
         if CAMERA_WARMUP_SECONDS > 0:
             # Allow camera to warm up, then snap a picture again
@@ -97,8 +98,8 @@ class Device:
         if ret:
             temp_dir = tempfile.gettempdir()
             image_path = os.path.join(
-                temp_dir, f"01_photo_{datetime.now().strftime('%Y%m%d%H%M%S%f')}.png"
-            )
+                temp_dir,
+                f"01_photo_{datetime.now().strftime('%Y%m%d%H%M%S%f')}.png")
             self.captured_images.append(image_path)
             cv2.imwrite(image_path, frame)
             logger.info(f"Camera image captured to {image_path}")
@@ -165,15 +166,18 @@ class Device:
 
         if os.getenv("STT_RUNNER") == "server":
             # STT will happen on the server. we're sending audio.
-            send_queue.put(
-                {"role": "user", "type": "audio", "format": "bytes.wav", "start": True}
-            )
+            send_queue.put({
+                "role": "user",
+                "type": "audio",
+                "format": "bytes.wav",
+                "start": True
+            })
         elif os.getenv("STT_RUNNER") == "client":
             # STT will happen here, on the client. we're sending text.
             send_queue.put({"role": "user", "type": "message", "start": True})
         else:
-            raise Exception("STT_RUNNER must be set to either 'client' or 'server'.")
-
+            raise Exception(
+                "STT_RUNNER must be set to either 'client' or 'server'.")
         """Record audio from the microphone and add it to the queue."""
         stream = p.open(
             format=FORMAT,
@@ -188,8 +192,7 @@ class Device:
         # Create a temporary WAV file to store the audio data
         temp_dir = tempfile.gettempdir()
         wav_path = os.path.join(
-            temp_dir, f"audio_{datetime.now().strftime('%Y%m%d%H%M%S%f')}.wav"
-        )
+            temp_dir, f"audio_{datetime.now().strftime('%Y%m%d%H%M%S%f')}.wav")
         wav_file = wave.open(wav_path, "wb")
         wav_file.setnchannels(CHANNELS)
         wav_file.setsampwidth(p.get_sample_size(FORMAT))
@@ -208,25 +211,29 @@ class Device:
         if duration < 0.3:
             # Just pressed it. Send stop message
             if os.getenv("STT_RUNNER") == "client":
-                send_queue.put({"role": "user", "type": "message", "content": "stop"})
-                send_queue.put({"role": "user", "type": "message", "end": True})
+                send_queue.put({
+                    "role": "user",
+                    "type": "message",
+                    "content": "stop"
+                })
+                send_queue.put({
+                    "role": "user",
+                    "type": "message",
+                    "end": True
+                })
             else:
-                send_queue.put(
-                    {
-                        "role": "user",
-                        "type": "audio",
-                        "format": "bytes.wav",
-                        "content": "",
-                    }
-                )
-                send_queue.put(
-                    {
-                        "role": "user",
-                        "type": "audio",
-                        "format": "bytes.wav",
-                        "end": True,
-                    }
-                )
+                send_queue.put({
+                    "role": "user",
+                    "type": "audio",
+                    "format": "bytes.wav",
+                    "content": "",
+                })
+                send_queue.put({
+                    "role": "user",
+                    "type": "audio",
+                    "format": "bytes.wav",
+                    "end": True,
+                })
         else:
             self.queue_all_captured_images()
 
@@ -238,8 +245,16 @@ class Device:
                 # Run stt then send text
                 text = stt_wav(wav_path)
                 logger.debug(f"STT result: {text}")
-                send_queue.put({"role": "user", "type": "message", "content": text})
-                send_queue.put({"role": "user", "type": "message", "end": True})
+                send_queue.put({
+                    "role": "user",
+                    "type": "message",
+                    "content": text
+                })
+                send_queue.put({
+                    "role": "user",
+                    "type": "message",
+                    "end": True
+                })
             else:
                 # Stream audio
                 with open(wav_path, "rb") as audio_file:
@@ -247,14 +262,12 @@ class Device:
                     while byte_data:
                         send_queue.put(byte_data)
                         byte_data = audio_file.read(CHUNK)
-                send_queue.put(
-                    {
-                        "role": "user",
-                        "type": "audio",
-                        "format": "bytes.wav",
-                        "end": True,
-                    }
-                )
+                send_queue.put({
+                    "role": "user",
+                    "type": "audio",
+                    "format": "bytes.wav",
+                    "end": True,
+                })
 
         if os.path.exists(wav_path):
             os.remove(wav_path)
@@ -285,7 +298,8 @@ class Device:
 
         if keyboard.Key.space in self.pressed_keys:
             self.toggle_recording(True)
-        elif {keyboard.Key.ctrl, keyboard.KeyCode.from_char("c")} <= self.pressed_keys:
+        elif {keyboard.Key.ctrl,
+              keyboard.KeyCode.from_char("c")} <= self.pressed_keys:
             logger.info("Ctrl+C pressed. Exiting...")
             kill_process_tree()
             os._exit(0)
@@ -297,8 +311,7 @@ class Device:
 
         """
         self.pressed_keys.discard(
-            key
-        )  # Remove the released key from the key press tracking set
+            key)  # Remove the released key from the key press tracking set
 
         if key == keyboard.Key.space:
             self.toggle_recording(False)
@@ -308,8 +321,7 @@ class Device:
     async def message_sender(self, websocket):
         while True:
             message = await asyncio.get_event_loop().run_in_executor(
-                None, send_queue.get
-            )
+                None, send_queue.get)
             if isinstance(message, bytes):
                 await websocket.send(message)
             else:
@@ -351,9 +363,8 @@ class Device:
 
                         # At this point, we have our message
 
-                        if message["type"] == "audio" and message["format"].startswith(
-                            "bytes"
-                        ):
+                        if message["type"] == "audio" and message[
+                                "format"].startswith("bytes"):
 
                             # Convert bytes to audio file
 
@@ -378,7 +389,8 @@ class Device:
                             if message["type"] == "code" and "end" in message:
                                 language = message["format"]
                                 code = message["content"]
-                                result = interpreter.computer.run(language, code)
+                                result = interpreter.computer.run(
+                                    language, code)
                                 send_queue.put(result)
             except:
                 logger.debug(traceback.format_exc())
@@ -408,8 +420,11 @@ class Device:
 
             # HACK: needs passwordless sudo
             process = await asyncio.create_subprocess_exec(
-                "sudo", "gpiomon", "-brf", *pindef, stdout=asyncio.subprocess.PIPE
-            )
+                "sudo",
+                "gpiomon",
+                "-brf",
+                *pindef,
+                stdout=asyncio.subprocess.PIPE)
             while True:
                 line = await process.stdout.readline()
                 if line:
@@ -422,9 +437,8 @@ class Device:
                     break
         else:
             # Keyboard listener for spacebar press/release
-            listener = keyboard.Listener(
-                on_press=self.on_press, on_release=self.on_release
-            )
+            listener = keyboard.Listener(on_press=self.on_press,
+                                         on_release=self.on_release)
             listener.start()
 
     def start(self):
