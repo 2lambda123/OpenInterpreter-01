@@ -117,7 +117,7 @@ class Device:
     def encode_image_to_base64(self, image_path):
         """Encodes an image file to a base64 string.
 
-        :param image_path: 
+        :param image_path:
 
         """
         with open(image_path, "rb") as image_file:
@@ -126,7 +126,7 @@ class Device:
     def add_image_to_send_queue(self, image_path):
         """Encodes an image and adds an LMC message to the send queue with the image data.
 
-        :param image_path: 
+        :param image_path:
 
         """
         base64_image = self.encode_image_to_base64(image_path)
@@ -262,7 +262,7 @@ class Device:
     def toggle_recording(self, state):
         """Toggle the recording state.
 
-        :param state: 
+        :param state:
 
         """
         global RECORDING, SPACEBAR_PRESSED
@@ -278,7 +278,7 @@ class Device:
     def on_press(self, key):
         """Detect spacebar press and Ctrl+C combination.
 
-        :param key: 
+        :param key:
 
         """
         self.pressed_keys.add(key)  # Add the pressed key to the set
@@ -293,7 +293,7 @@ class Device:
     def on_release(self, key):
         """Detect spacebar release and 'c' key press for camera, and handle key release.
 
-        :param key: 
+        :param key:
 
         """
         self.pressed_keys.discard(
