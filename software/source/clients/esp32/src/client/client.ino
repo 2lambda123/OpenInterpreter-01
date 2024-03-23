@@ -74,11 +74,11 @@ const char post_connected_html[] PROGMEM = R"=====(
 <head>
   <title>01OS Setup</title>
   <style>
-  
+
   * {
       box-sizing: border-box;
     }
-    
+
     body {
       background-color: #fff;
       margin: 0;
@@ -118,15 +118,15 @@ const char post_connected_html[] PROGMEM = R"=====(
     input[type="submit"]:hover {
       background-color: #333;
     }
-    
+
 
 
     #error_message {
     color: red;
     font-weight: bold;
-    text-align: center; 
+    text-align: center;
     width: 100%;
-    margin-top: 20px; 
+    margin-top: 20px;
     max-width: 300px;
 }
   </style>
@@ -140,7 +140,7 @@ const char post_connected_html[] PROGMEM = R"=====(
       <input type="text" id="server_address" name="server_address"><br><br>
     </div>
 
-   
+
 
     <input type="submit" value="Connect"/>
      <p id="error_message"></p>
@@ -266,7 +266,7 @@ bool connectTo01OS(String server_address)
         portStr = server_address.substring(colonIndex + 1);
     } else {
         domain = server_address;
-        portStr = ""; 
+        portStr = "";
     }
 
     WiFiClient c;
@@ -277,7 +277,7 @@ bool connectTo01OS(String server_address)
         port = portStr.toInt();
     }
 
-    HttpClient http(c, domain.c_str(), port); 
+    HttpClient http(c, domain.c_str(), port);
     Serial.println("Connecting to 01OS at " + domain + ":" + port + "/ping");
 
     if (domain.indexOf("ngrok") != -1) {
@@ -428,7 +428,7 @@ void setUpWebserver(AsyncWebServer &server, const IPAddress &localIP)
               {
     String ssid;
     String password;
-    
+
     // Check if SSID parameter exists and assign it
     if(request->hasParam("ssid", true)) {
         ssid = request->getParam("ssid", true)->value();
@@ -438,7 +438,7 @@ void setUpWebserver(AsyncWebServer &server, const IPAddress &localIP)
             Serial.println("OTHER SSID SELECTED: " + ssid);
         }
     }
-    
+
     // Check if Password parameter exists and assign it
     if(request->hasParam("password", true)) {
         password = request->getParam("password", true)->value();
@@ -455,7 +455,7 @@ void setUpWebserver(AsyncWebServer &server, const IPAddress &localIP)
       AsyncWebServerResponse *response = request->beginResponse(200, "text/html", htmlContent);
       response->addHeader("Cache-Control", "public,max-age=31536000");  // save this file to cache for 1 year (unless you refresh)
       request->send(response);
-      Serial.println("Served Post connection HTML Page"); 
+      Serial.println("Served Post connection HTML Page");
     } else {
       request->send(200, "text/plain", "Failed to connect to " + ssid);
     } });
@@ -463,7 +463,7 @@ void setUpWebserver(AsyncWebServer &server, const IPAddress &localIP)
     server.on("/submit_01os", HTTP_POST, [](AsyncWebServerRequest *request)
               {
     String server_address;
-    
+
     // Check if SSID parameter exists and assign it
     if(request->hasParam("server_address", true)) {
         server_address = request->getParam("server_address", true)->value();
@@ -479,7 +479,7 @@ void setUpWebserver(AsyncWebServer &server, const IPAddress &localIP)
     {
         AsyncWebServerResponse *response = request->beginResponse(200, "text/html", successHtml);
         response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");  // Prevent caching of this page
-        request->send(response);     
+        request->send(response);
         Serial.println(" ");
         Serial.println("Connected to 01 websocket!");
         Serial.println(" ");
@@ -491,7 +491,7 @@ void setUpWebserver(AsyncWebServer &server, const IPAddress &localIP)
         String htmlContent = String(post_connected_html); // Load your HTML template
         // Inject the error message
         htmlContent.replace("<p id=\"error_message\"></p>", "<p id=\"error_message\" style=\"color: red;\">Error connecting, please try again.</p>");
-        
+
         AsyncWebServerResponse *response = request->beginResponse(200, "text/html", htmlContent);
         response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");  // Prevent caching of this page
         request->send(response);
@@ -564,7 +564,7 @@ void InitI2SSpeakerOrMic(int mode)
 #if ESP_IDF_VERSION > ESP_IDF_VERSION_VAL(4, 1, 0)
         .communication_format =
             I2S_COMM_FORMAT_STAND_I2S, // Set the format of the communication.
-#else                                 
+#else
         .communication_format = I2S_COMM_FORMAT_I2S,
 #endif
         .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
@@ -756,7 +756,7 @@ void loop()
     if ((millis() - last_dns_ms) > DNS_INTERVAL) {
         last_dns_ms = millis();            // seems to help with stability, if you are doing other things in the loop this may not be needed
         dnsServer.processNextRequest();    // I call this atleast every 10ms in my other projects (can be higher but I haven't tested it for stability)
-    }         
+    }
 
     // Check WiFi connection status
     if (WiFi.status() == WL_CONNECTED && !hasSetupWebsocket)

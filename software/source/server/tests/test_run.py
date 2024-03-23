@@ -1,11 +1,6 @@
 # test_main.py
-import subprocess
-import uuid
 import pytest
 from source.server.i import configure_interpreter
-from unittest.mock import Mock
-from fastapi.testclient import TestClient
-
 
 
 @pytest.mark.asyncio
@@ -34,6 +29,7 @@ def test_interpreter_chat(mock_interpreter):
     assert len(mock_interpreter.messages) == len(messages)
     assert mock_interpreter.messages[-1]["role"] == "assistant"
     assert "don't have feelings" in mock_interpreter.messages[-1]["content"]
+
 
 def test_interpreter_configuration(mock_interpreter):
     # Test interpreter configuration
