@@ -69,6 +69,7 @@ send_queue = queue.Queue()
 
 
 class Device:
+    """ """
     def __init__(self):
         self.pressed_keys = set()
         self.captured_images = []
@@ -76,7 +77,11 @@ class Device:
         self.server_url = ""
 
     def fetch_image_from_camera(self, camera_index=CAMERA_DEVICE_INDEX):
-        """Captures an image from the specified camera device and saves it to a temporary file. Adds the image to the captured_images list."""
+        """Captures an image from the specified camera device and saves it to a temporary file. Adds the image to the captured_images list.
+
+        :param camera_index:  (Default value = CAMERA_DEVICE_INDEX)
+
+        """
         image_path = None
 
         cap = cv2.VideoCapture(camera_index)
@@ -110,12 +115,20 @@ class Device:
         return image_path
 
     def encode_image_to_base64(self, image_path):
-        """Encodes an image file to a base64 string."""
+        """Encodes an image file to a base64 string.
+
+        :param image_path: 
+
+        """
         with open(image_path, "rb") as image_file:
             return base64.b64encode(image_file.read()).decode("utf-8")
 
     def add_image_to_send_queue(self, image_path):
-        """Encodes an image and adds an LMC message to the send queue with the image data."""
+        """Encodes an image and adds an LMC message to the send queue with the image data.
+
+        :param image_path: 
+
+        """
         base64_image = self.encode_image_to_base64(image_path)
         image_message = {
             "role": "user",
@@ -148,6 +161,7 @@ class Device:
                 logger.info(traceback.format_exc())
 
     def record_audio(self):
+        """ """
 
         if os.getenv("STT_RUNNER") == "server":
             # STT will happen on the server. we're sending audio.
@@ -246,7 +260,11 @@ class Device:
             os.remove(wav_path)
 
     def toggle_recording(self, state):
-        """Toggle the recording state."""
+        """Toggle the recording state.
+
+        :param state: 
+
+        """
         global RECORDING, SPACEBAR_PRESSED
         if state and not SPACEBAR_PRESSED:
             SPACEBAR_PRESSED = True
@@ -258,7 +276,11 @@ class Device:
             RECORDING = False
 
     def on_press(self, key):
-        """Detect spacebar press and Ctrl+C combination."""
+        """Detect spacebar press and Ctrl+C combination.
+
+        :param key: 
+
+        """
         self.pressed_keys.add(key)  # Add the pressed key to the set
 
         if keyboard.Key.space in self.pressed_keys:
@@ -269,7 +291,11 @@ class Device:
             os._exit(0)
 
     def on_release(self, key):
-        """Detect spacebar release and 'c' key press for camera, and handle key release."""
+        """Detect spacebar release and 'c' key press for camera, and handle key release.
+
+        :param key: 
+
+        """
         self.pressed_keys.discard(
             key
         )  # Remove the released key from the key press tracking set
@@ -402,6 +428,7 @@ class Device:
             listener.start()
 
     def start(self):
+        """ """
         if os.getenv("TEACH_MODE") != "True":
             asyncio.run(self.start_async())
             p.terminate()
