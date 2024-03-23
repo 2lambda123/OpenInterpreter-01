@@ -1,35 +1,36 @@
-from ..utils.accumulator import Accumulator
-from ..server.utils.logs import logger
-from ..server.utils.logs import setup_logging
-from ..server.utils.process_utils import kill_process_tree
-from ..server.utils.get_system_info import get_system_info
-from ..server.utils.kernel import put_kernel_messages_into_queue
+import ast
+import asyncio
+import base64
+import io
+import json
+import os
+import queue
+import tempfile
+import threading
+import time
+import traceback
+import wave
+from datetime import datetime
+from queue import Queue
+
+import cv2
+import pyaudio
+import pydub
+import websockets
+from dotenv import load_dotenv
 
 # Just for code execution. Maybe we should let people do from interpreter.computer import run?
 from interpreter import interpreter
-import base64
-import cv2
-from datetime import datetime
-import tempfile
-import wave
-import time
-import io
-from pydub.playback import play
 from pydub import AudioSegment
-import ast
-import pydub
-import queue
-import websockets
-import traceback
-import json
+from pydub.playback import play
 from pynput import keyboard
-from queue import Queue
 from starlette.websockets import WebSocket
-import pyaudio
-import threading
-import asyncio
-import os
-from dotenv import load_dotenv
+
+from ..server.utils.get_system_info import get_system_info
+from ..server.utils.kernel import put_kernel_messages_into_queue
+from ..server.utils.logs import logger, setup_logging
+from ..server.utils.process_utils import kill_process_tree
+from ..utils.accumulator import Accumulator
 
 load_dotenv()  # take environment variables from .env.
 
