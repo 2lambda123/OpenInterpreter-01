@@ -18,8 +18,6 @@ import pyaudio
 import pydub
 import websockets
 from dotenv import load_dotenv
-
-# Just for code execution. Maybe we should let people do from interpreter.computer import run?
 from interpreter import interpreter
 from pydub import AudioSegment
 from pydub.playback import play
@@ -28,9 +26,11 @@ from starlette.websockets import WebSocket
 
 from ..server.utils.get_system_info import get_system_info
 from ..server.utils.kernel import put_kernel_messages_into_queue
-from ..server.utils.logs import logger, setup_logging
+from ..server.utils.logs import logger
+from ..server.utils.logs import setup_logging
 from ..server.utils.process_utils import kill_process_tree
 from ..utils.accumulator import Accumulator
+# Just for code execution. Maybe we should let people do from interpreter.computer import run?
 
 load_dotenv()  # take environment variables from .env.
 
