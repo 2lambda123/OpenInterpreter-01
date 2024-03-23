@@ -1,43 +1,43 @@
+from ..utils.accumulator import Accumulator
+from ..server.utils.logs import logger
+from ..server.utils.logs import setup_logging
+from ..server.utils.process_utils import kill_process_tree
+from ..server.utils.get_system_info import get_system_info
+from ..server.utils.kernel import put_kernel_messages_into_queue
+# Just for code execution. Maybe we should let people do from interpreter.computer import run?
+from interpreter import interpreter
+import base64
+import cv2
+from datetime import datetime
+import tempfile
+import wave
+import time
+import io
+from pydub.playback import play
+from pydub import AudioSegment
+import ast
+import pydub
+import queue
+import websockets
+import traceback
+import json
+from pynput import keyboard
+from queue import Queue
+from starlette.websockets import WebSocket
+import pyaudio
+import threading
+import asyncio
+import os
 from dotenv import load_dotenv
 load_dotenv()  # take environment variables from .env.
 
-import os
-import asyncio
-import threading
-import os
-import pyaudio
-from starlette.websockets import WebSocket
-from queue import Queue
-from pynput import keyboard
-import json
-import traceback
-import websockets
-import queue
-import pydub
-import ast
-from pydub import AudioSegment
-from pydub.playback import play
-import io
-import time
-import wave
-import tempfile
-from datetime import datetime
-import cv2
-import base64
-from interpreter import interpreter # Just for code execution. Maybe we should let people do from interpreter.computer import run?
 # In the future, I guess kernel watching code should be elsewhere? Somewhere server / client agnostic?
-from ..server.utils.kernel import put_kernel_messages_into_queue
-from ..server.utils.get_system_info import get_system_info
-from ..server.utils.process_utils import kill_process_tree
 
-from ..server.utils.logs import setup_logging
-from ..server.utils.logs import logger
 setup_logging()
 
 os.environ["STT_RUNNER"] = "server"
 os.environ["TTS_RUNNER"] = "server"
 
-from ..utils.accumulator import Accumulator
 
 accumulator = Accumulator()
 
@@ -64,6 +64,7 @@ p = pyaudio.PyAudio()
 
 send_queue = queue.Queue()
 
+
 class Device:
     def __init__(self):
         self.pressed_keys = set()
@@ -87,18 +88,20 @@ class Device:
 
         if ret:
             temp_dir = tempfile.gettempdir()
-            image_path = os.path.join(temp_dir, f"01_photo_{datetime.now().strftime('%Y%m%d%H%M%S%f')}.png")
+            image_path = os.path.join(
+                temp_dir, f"01_photo_{datetime.now().strftime('%Y%m%d%H%M%S%f')}.png")
             self.captured_images.append(image_path)
             cv2.imwrite(image_path, frame)
             logger.info(f"Camera image captured to {image_path}")
-            logger.info(f"You now have {len(self.captured_images)} images which will be sent along with your next audio message.")
+            logger.info(
+                f"You now have {len(self.captured_images)} images which will be sent along with your next audio message.")
         else:
-            logger.error(f"Error: Couldn't capture an image from camera ({camera_index})")
+            logger.error(
+                f"Error: Couldn't capture an image from camera ({camera_index})")
 
         cap.release()
 
         return image_path
-    
 
     def encode_image_to_base64(self, image_path):
         """Encodes an image file to a base64 string."""
@@ -124,7 +127,6 @@ class Device:
             self.add_image_to_send_queue(image_path)
         self.captured_images.clear()  # Clear the list after sending
 
-        
     async def play_audiosegments(self):
         """Plays them sequentially."""
         while True:
@@ -139,26 +141,29 @@ class Device:
             except:
                 logger.info(traceback.format_exc())
 
-
     def record_audio(self):
-        
+
         if os.getenv('STT_RUNNER') == "server":
             # STT will happen on the server. we're sending audio.
-            send_queue.put({"role": "user", "type": "audio", "format": "bytes.wav", "start": True})
+            send_queue.put({"role": "user", "type": "audio",
+                           "format": "bytes.wav", "start": True})
         elif os.getenv('STT_RUNNER') == "client":
             # STT will happen here, on the client. we're sending text.
             send_queue.put({"role": "user", "type": "message", "start": True})
         else:
-            raise Exception("STT_RUNNER must be set to either 'client' or 'server'.")
+            raise Exception(
+                "STT_RUNNER must be set to either 'client' or 'server'.")
 
         """Record audio from the microphone and add it to the queue."""
-        stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK)
+        stream = p.open(format=FORMAT, channels=CHANNELS,
+                        rate=RATE, input=True, frames_per_buffer=CHUNK)
         print("Recording started...")
         global RECORDING
 
         # Create a temporary WAV file to store the audio data
         temp_dir = tempfile.gettempdir()
-        wav_path = os.path.join(temp_dir, f"audio_{datetime.now().strftime('%Y%m%d%H%M%S%f')}.wav")
+        wav_path = os.path.join(
+            temp_dir, f"audio_{datetime.now().strftime('%Y%m%d%H%M%S%f')}.wav")
         wav_file = wave.open(wav_path, 'wb')
         wav_file.setnchannels(CHANNELS)
         wav_file.setsampwidth(p.get_sample_size(FORMAT))
@@ -177,11 +182,15 @@ class Device:
         if duration < 0.3:
             # Just pressed it. Send stop message
             if os.getenv('STT_RUNNER') == "client":
-                send_queue.put({"role": "user", "type": "message", "content": "stop"})
-                send_queue.put({"role": "user", "type": "message", "end": True})
+                send_queue.put(
+                    {"role": "user", "type": "message", "content": "stop"})
+                send_queue.put(
+                    {"role": "user", "type": "message", "end": True})
             else:
-                send_queue.put({"role": "user", "type": "audio", "format": "bytes.wav", "content": ""})
-                send_queue.put({"role": "user", "type": "audio", "format": "bytes.wav", "end": True})
+                send_queue.put({"role": "user", "type": "audio",
+                               "format": "bytes.wav", "content": ""})
+                send_queue.put({"role": "user", "type": "audio",
+                               "format": "bytes.wav", "end": True})
         else:
             self.queue_all_captured_images()
 
@@ -193,8 +202,10 @@ class Device:
                 # Run stt then send text
                 text = stt_wav(wav_path)
                 logger.debug(f"STT result: {text}")
-                send_queue.put({"role": "user", "type": "message", "content": text})
-                send_queue.put({"role": "user", "type": "message", "end": True})
+                send_queue.put(
+                    {"role": "user", "type": "message", "content": text})
+                send_queue.put(
+                    {"role": "user", "type": "message", "end": True})
             else:
                 # Stream audio
                 with open(wav_path, 'rb') as audio_file:
@@ -202,7 +213,8 @@ class Device:
                     while byte_data:
                         send_queue.put(byte_data)
                         byte_data = audio_file.read(CHUNK)
-                send_queue.put({"role": "user", "type": "audio", "format": "bytes.wav", "end": True})
+                send_queue.put({"role": "user", "type": "audio",
+                               "format": "bytes.wav", "end": True})
 
         if os.path.exists(wav_path):
             os.remove(wav_path)
@@ -232,14 +244,14 @@ class Device:
 
     def on_release(self, key):
         """Detect spacebar release and 'c' key press for camera, and handle key release."""
-        self.pressed_keys.discard(key)  # Remove the released key from the key press tracking set
+        self.pressed_keys.discard(
+            key)  # Remove the released key from the key press tracking set
 
         if key == keyboard.Key.space:
             self.toggle_recording(False)
         elif CAMERA_ENABLED and key == keyboard.KeyCode.from_char('c'):
             self.fetch_image_from_camera()
 
-    
     async def message_sender(self, websocket):
         while True:
             message = await asyncio.get_event_loop().run_in_executor(None, send_queue.get)
@@ -256,17 +268,20 @@ class Device:
             try:
                 async with websockets.connect(WS_URL) as websocket:
                     if CAMERA_ENABLED:
-                        print("\nPress the spacebar to start/stop recording. Press 'c' to capture an image from the camera. Press CTRL-C to exit.")
+                        print(
+                            "\nPress the spacebar to start/stop recording. Press 'c' to capture an image from the camera. Press CTRL-C to exit.")
                     else:
-                        print("\nPress the spacebar to start/stop recording. Press CTRL-C to exit.")
-                        
+                        print(
+                            "\nPress the spacebar to start/stop recording. Press CTRL-C to exit.")
+
                     asyncio.create_task(self.message_sender(websocket))
 
                     while True:
                         await asyncio.sleep(0.01)
                         chunk = await websocket.recv()
 
-                        logger.debug(f"Got this message from the server: {type(chunk)} {chunk}")
+                        logger.debug(
+                            f"Got this message from the server: {type(chunk)} {chunk}")
 
                         if type(chunk) == str:
                             chunk = json.loads(chunk)
@@ -303,50 +318,52 @@ class Device:
                             if message["type"] == "code" and "end" in message:
                                 language = message["format"]
                                 code = message["content"]
-                                result = interpreter.computer.run(language, code)
+                                result = interpreter.computer.run(
+                                    language, code)
                                 send_queue.put(result)
             except:
                 logger.debug(traceback.format_exc())
                 if show_connection_log:
-                  logger.info(f"Connecting to `{WS_URL}`...")
-                  show_connection_log = False
+                    logger.info(f"Connecting to `{WS_URL}`...")
+                    show_connection_log = False
                 await asyncio.sleep(2)
 
     async def start_async(self):
-            # Configuration for WebSocket
-            WS_URL = f"ws://{self.server_url}"
-            # Start the WebSocket communication
-            asyncio.create_task(self.websocket_communication(WS_URL))
+        # Configuration for WebSocket
+        WS_URL = f"ws://{self.server_url}"
+        # Start the WebSocket communication
+        asyncio.create_task(self.websocket_communication(WS_URL))
 
-            # Start watching the kernel if it's your job to do that
-            if os.getenv('CODE_RUNNER') == "client":
-                asyncio.create_task(put_kernel_messages_into_queue(send_queue))
+        # Start watching the kernel if it's your job to do that
+        if os.getenv('CODE_RUNNER') == "client":
+            asyncio.create_task(put_kernel_messages_into_queue(send_queue))
 
-            asyncio.create_task(self.play_audiosegments())
-            
-            # If Raspberry Pi, add the button listener, otherwise use the spacebar
-            if current_platform.startswith("raspberry-pi"):
-                logger.info("Raspberry Pi detected, using button on GPIO pin 15")
-                # Use GPIO pin 15
-                pindef = ["gpiochip4", "15"] # gpiofind PIN15
-                print("PINDEF", pindef)
+        asyncio.create_task(self.play_audiosegments())
 
-                # HACK: needs passwordless sudo
-                process = await asyncio.create_subprocess_exec("sudo", "gpiomon", "-brf", *pindef, stdout=asyncio.subprocess.PIPE)
-                while True:
-                    line = await process.stdout.readline()
-                    if line:
-                        line = line.decode().strip()
-                        if "FALLING" in line:
-                            self.toggle_recording(False)
-                        elif "RISING" in line:
-                            self.toggle_recording(True)
-                    else:
-                        break
-            else:
-                # Keyboard listener for spacebar press/release
-                listener = keyboard.Listener(on_press=self.on_press, on_release=self.on_release)
-                listener.start()
+        # If Raspberry Pi, add the button listener, otherwise use the spacebar
+        if current_platform.startswith("raspberry-pi"):
+            logger.info("Raspberry Pi detected, using button on GPIO pin 15")
+            # Use GPIO pin 15
+            pindef = ["gpiochip4", "15"]  # gpiofind PIN15
+            print("PINDEF", pindef)
+
+            # HACK: needs passwordless sudo
+            process = await asyncio.create_subprocess_exec("sudo", "gpiomon", "-brf", *pindef, stdout=asyncio.subprocess.PIPE)
+            while True:
+                line = await process.stdout.readline()
+                if line:
+                    line = line.decode().strip()
+                    if "FALLING" in line:
+                        self.toggle_recording(False)
+                    elif "RISING" in line:
+                        self.toggle_recording(True)
+                else:
+                    break
+        else:
+            # Keyboard listener for spacebar press/release
+            listener = keyboard.Listener(
+                on_press=self.on_press, on_release=self.on_release)
+            listener.start()
 
     def start(self):
         if os.getenv('TEACH_MODE') != "True":
