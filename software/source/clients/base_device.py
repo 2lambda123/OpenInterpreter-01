@@ -350,8 +350,8 @@ class Device:
             except:
                 logger.debug(traceback.format_exc())
                 if show_connection_log:
-                  logger.info(f"Connecting to `{WS_URL}`...")
-                  show_connection_log = False
+                    logger.info(f"Connecting to `{WS_URL}`...")
+                    show_connection_log = False
                 await asyncio.sleep(2)
 
     async def start_async(self):
