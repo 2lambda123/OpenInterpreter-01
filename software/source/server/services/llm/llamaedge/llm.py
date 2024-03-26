@@ -61,8 +61,8 @@ class Llm:
         headers = {"accept": "application/json", "Content-Type": "application/json"}
         data = {"messages": messages, "model": "llama-2-chat"}
         with requests.post(
-            url, headers=headers, data=json.dumps(data), stream=True, 
-        timeout=60) as response:
+            url, headers=headers, data=json.dumps(data), stream=True, timeout=60
+        ) as response:
             for line in response.iter_lines():
                 if line:
                     yield json.loads(line)
