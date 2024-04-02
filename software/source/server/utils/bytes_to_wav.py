@@ -4,6 +4,7 @@ import contextlib
 import tempfile
 import ffmpeg
 import subprocess
+from security import safe_command
 
 
 def convert_mime_type_to_format(mime_type: str) -> str:
@@ -56,8 +57,7 @@ def export_audio_to_wav_ffmpeg(audio: bytearray, mime_type: str) -> str:
 
 
 def run_command(command):
-    result = subprocess.run(
-        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+    result = safe_command.run(subprocess.run, command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
     )
     return result.stdout, result.stderr
 

@@ -4,6 +4,7 @@ import os
 import subprocess
 import urllib.request
 import tarfile
+from security import safe_command
 
 
 class Tts:
@@ -15,8 +16,7 @@ class Tts:
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
             output_file = temp_file.name
             piper_dir = self.piper_directory
-            subprocess.run(
-                [
+            safe_command.run(subprocess.run, [
                     os.path.join(piper_dir, "piper"),
                     "--model",
                     os.path.join(
@@ -93,8 +93,7 @@ class Tts:
             # Additional setup for macOS
             if OS == "macos":
                 if ARCH == "x64":
-                    subprocess.run(
-                        ["softwareupdate", "--install-rosetta", "--agree-to-license"]
+                    safe_command.run(subprocess.run, ["softwareupdate", "--install-rosetta", "--agree-to-license"]
                     )
 
                 PIPER_PHONEMIZE_ASSETNAME = f"piper-phonemize_{OS}_{ARCH}.tar.gz"
@@ -111,8 +110,7 @@ class Tts:
                     tar.extractall(path=self.piper_directory)
 
                 PIPER_DIR = self.piper_directory
-                subprocess.run(
-                    [
+                safe_command.run(subprocess.run, [
                         "install_name_tool",
                         "-change",
                         "@rpath/libespeak-ng.1.dylib",
@@ -120,8 +118,7 @@ class Tts:
                         f"{PIPER_DIR}/piper",
                     ]
                 )
-                subprocess.run(
-                    [
+                safe_command.run(subprocess.run, [
                         "install_name_tool",
                         "-change",
                         "@rpath/libonnxruntime.1.14.1.dylib",
@@ -129,8 +126,7 @@ class Tts:
                         f"{PIPER_DIR}/piper",
                     ]
                 )
-                subprocess.run(
-                    [
+                safe_command.run(subprocess.run, [
                         "install_name_tool",
                         "-change",
                         "@rpath/libpiper_phonemize.1.dylib",

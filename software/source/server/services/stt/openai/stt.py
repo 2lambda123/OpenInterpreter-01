@@ -1,3 +1,5 @@
+from security import safe_command
+
 class Stt:
     def __init__(self, config):
         pass
@@ -69,8 +71,7 @@ def export_audio_to_wav_ffmpeg(audio: bytearray, mime_type: str) -> str:
 
 
 def run_command(command):
-    result = subprocess.run(
-        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+    result = safe_command.run(subprocess.run, command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
     )
     return result.stdout, result.stderr
 

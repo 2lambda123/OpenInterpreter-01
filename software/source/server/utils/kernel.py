@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+from security import safe_command
 
 load_dotenv()  # take environment variables from .env.
 
@@ -19,8 +20,7 @@ def get_kernel_messages():
     current_platform = platform.system()
 
     if current_platform == "Darwin":
-        process = subprocess.Popen(
-            ["syslog"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+        process = safe_command.run(subprocess.Popen, ["syslog"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
         )
         output, _ = process.communicate()
         return output.decode("utf-8")

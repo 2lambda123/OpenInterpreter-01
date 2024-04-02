@@ -4,6 +4,7 @@ import subprocess
 import time
 import wget
 import stat
+from security import safe_command
 
 
 class Llm:
@@ -21,8 +22,7 @@ class Llm:
 
     def install(self, service_directory):
         if platform.system() == "Darwin":  # Check if the system is MacOS
-            result = subprocess.run(
-                ["xcode-select", "-p"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            result = safe_command.run(subprocess.run, ["xcode-select", "-p"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
             )
             if result.returncode != 0:
                 print(
@@ -68,7 +68,7 @@ class Llm:
                     "The llamafile is not executable. Please check the file permissions."
                 )
                 raise
-            subprocess.Popen([llamafile_path, "-ngl", "9999"])
+            safe_command.run(subprocess.Popen, [llamafile_path, "-ngl", "9999"])
         else:
             error_message = "The llamafile does not exist or is corrupted. Please ensure it has been downloaded correctly or try again."
             print(error_message)
