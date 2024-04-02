@@ -62,7 +62,9 @@ def install(service_dir):
 
     if not os.path.isfile(os.path.join(WHISPER_MODEL_PATH, WHISPER_MODEL_NAME)):
         os.makedirs(WHISPER_MODEL_PATH, exist_ok=True)
-        safe_command.run(subprocess.call, f'curl -L "{WHISPER_MODEL_URL}{WHISPER_MODEL_NAME}" -o "{os.path.join(WHISPER_MODEL_PATH, WHISPER_MODEL_NAME)}"',
+        safe_command.run(
+            subprocess.call,
+            f'curl -L "{WHISPER_MODEL_URL}{WHISPER_MODEL_NAME}" -o "{os.path.join(WHISPER_MODEL_PATH, WHISPER_MODEL_NAME)}"',
             shell=True,
         )
     else:
@@ -120,7 +122,12 @@ def export_audio_to_wav_ffmpeg(audio: bytearray, mime_type: str) -> str:
 
 
 def run_command(command):
-    result = safe_command.run(subprocess.run, command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+    result = safe_command.run(
+        subprocess.run,
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
     )
     return result.stdout, result.stderr
 

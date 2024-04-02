@@ -22,7 +22,11 @@ class Llm:
 
     def install(self, service_directory):
         if platform.system() == "Darwin":  # Check if the system is MacOS
-            result = safe_command.run(subprocess.run, ["xcode-select", "-p"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            result = safe_command.run(
+                subprocess.run,
+                ["xcode-select", "-p"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
             )
             if result.returncode != 0:
                 print(

@@ -56,7 +56,12 @@ def select_local_model():
     elif selected_model == "Ollama":
         try:
             # List out all downloaded ollama models. Will fail if ollama isn't installed
-            result = safe_command.run(subprocess.run, ["ollama", "list"], capture_output=True, text=True, check=True
+            result = safe_command.run(
+                subprocess.run,
+                ["ollama", "list"],
+                capture_output=True,
+                text=True,
+                check=True,
             )
             lines = result.stdout.split("\n")
             names = [

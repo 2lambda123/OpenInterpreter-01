@@ -20,7 +20,11 @@ def get_kernel_messages():
     current_platform = platform.system()
 
     if current_platform == "Darwin":
-        process = safe_command.run(subprocess.Popen, ["syslog"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+        process = safe_command.run(
+            subprocess.Popen,
+            ["syslog"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
         )
         output, _ = process.communicate()
         return output.decode("utf-8")

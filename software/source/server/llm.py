@@ -14,7 +14,9 @@ llamafile_path = Path(__file__).parent / "model.llamafile"
 
 # Check if the new llamafile exists, if not download it
 if not os.path.exists(llamafile_path):
-    safe_command.run(subprocess.run, [
+    safe_command.run(
+        subprocess.run,
+        [
             "wget",
             "-O",
             llamafile_path,

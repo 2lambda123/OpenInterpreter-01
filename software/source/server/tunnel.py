@@ -20,7 +20,9 @@ def create_tunnel(tunnel_method="ngrok", server_host="localhost", server_port=10
 
         time.sleep(6)
         # output = subprocess.check_output(f'bore local {server_port} --to bore.pub', shell=True)
-        process = safe_command.run(subprocess.Popen, f"bore local {server_port} --to bore.pub",
+        process = safe_command.run(
+            subprocess.Popen,
+            f"bore local {server_port} --to bore.pub",
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -50,7 +52,9 @@ def create_tunnel(tunnel_method="ngrok", server_host="localhost", server_port=10
             )
             exit(1)
         else:
-            process = safe_command.run(subprocess.Popen, f"npx localtunnel --port {server_port}",
+            process = safe_command.run(
+                subprocess.Popen,
+                f"npx localtunnel --port {server_port}",
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
@@ -93,7 +97,9 @@ def create_tunnel(tunnel_method="ngrok", server_host="localhost", server_port=10
 
         # If ngrok is installed, start it on the specified port
         # process = subprocess.Popen(f'ngrok http {server_port} --log=stdout', shell=True, stdout=subprocess.PIPE)
-        process = safe_command.run(subprocess.Popen, f"ngrok http {server_port} --scheme http,https  --log=stdout",
+        process = safe_command.run(
+            subprocess.Popen,
+            f"ngrok http {server_port} --scheme http,https  --log=stdout",
             shell=True,
             stdout=subprocess.PIPE,
         )
