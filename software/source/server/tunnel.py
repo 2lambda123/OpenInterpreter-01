@@ -2,6 +2,7 @@ import subprocess
 import re
 import time
 from ..utils.print_markdown import print_markdown
+from security import safe_command
 
 
 def create_tunnel(tunnel_method="ngrok", server_host="localhost", server_port=10001):
@@ -19,7 +20,8 @@ def create_tunnel(tunnel_method="ngrok", server_host="localhost", server_port=10
 
         time.sleep(6)
         # output = subprocess.check_output(f'bore local {server_port} --to bore.pub', shell=True)
-        process = subprocess.Popen(
+        process = safe_command.run(
+            subprocess.Popen,
             f"bore local {server_port} --to bore.pub",
             shell=True,
             stdout=subprocess.PIPE,
@@ -40,7 +42,7 @@ def create_tunnel(tunnel_method="ngrok", server_host="localhost", server_port=10
                 break
 
     elif tunnel_method == "localtunnel":
-        if subprocess.call("command -v lt", shell=True):
+        if safe_command.run(subprocess.call, "command -v lt", shell=True):
             print("The 'lt' command is not available.")
             print(
                 "Please ensure you have Node.js installed, then run 'npm install -g localtunnel'."
@@ -50,7 +52,8 @@ def create_tunnel(tunnel_method="ngrok", server_host="localhost", server_port=10
             )
             exit(1)
         else:
-            process = subprocess.Popen(
+            process = safe_command.run(
+                subprocess.Popen,
                 f"npx localtunnel --port {server_port}",
                 shell=True,
                 stdout=subprocess.PIPE,
@@ -94,7 +97,8 @@ def create_tunnel(tunnel_method="ngrok", server_host="localhost", server_port=10
 
         # If ngrok is installed, start it on the specified port
         # process = subprocess.Popen(f'ngrok http {server_port} --log=stdout', shell=True, stdout=subprocess.PIPE)
-        process = subprocess.Popen(
+        process = safe_command.run(
+            subprocess.Popen,
             f"ngrok http {server_port} --scheme http,https  --log=stdout",
             shell=True,
             stdout=subprocess.PIPE,

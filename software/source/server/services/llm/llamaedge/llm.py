@@ -2,6 +2,7 @@ import os
 import subprocess
 import requests
 import json
+from security import safe_command
 
 
 class Llm:
@@ -15,7 +16,8 @@ class Llm:
             os.makedirs(LLM_FOLDER_PATH, exist_ok=True)
 
             # Install WasmEdge
-            subprocess.run(
+            safe_command.run(
+                subprocess.run,
                 [
                     "curl",
                     "-sSf",
@@ -26,19 +28,24 @@ class Llm:
                     "--",
                     "--plugin",
                     "wasi_nn-ggml",
-                ]
+                ],
             )
 
             # Download the Qwen1.5-0.5B-Chat model GGUF file
             MODEL_URL = "https://huggingface.co/second-state/Qwen1.5-0.5B-Chat-GGUF/resolve/main/Qwen1.5-0.5B-Chat-Q5_K_M.gguf"
-            subprocess.run(["curl", "-LO", MODEL_URL], cwd=self.llm_directory)
+            safe_command.run(
+                subprocess.run, ["curl", "-LO", MODEL_URL], cwd=self.llm_directory
+            )
 
             # Download the llama-api-server.wasm app
             APP_URL = "https://github.com/LlamaEdge/LlamaEdge/releases/latest/download/llama-api-server.wasm"
-            subprocess.run(["curl", "-LO", APP_URL], cwd=self.llm_directory)
+            safe_command.run(
+                subprocess.run, ["curl", "-LO", APP_URL], cwd=self.llm_directory
+            )
 
             # Run the API server
-            subprocess.run(
+            safe_command.run(
+                subprocess.run,
                 [
                     "wasmedge",
                     "--dir",

@@ -3,6 +3,7 @@ import subprocess
 import time
 import inquirer
 from interpreter import interpreter
+from security import safe_command
 
 
 def select_local_model():
@@ -55,8 +56,12 @@ def select_local_model():
     elif selected_model == "Ollama":
         try:
             # List out all downloaded ollama models. Will fail if ollama isn't installed
-            result = subprocess.run(
-                ["ollama", "list"], capture_output=True, text=True, check=True
+            result = safe_command.run(
+                subprocess.run,
+                ["ollama", "list"],
+                capture_output=True,
+                text=True,
+                check=True,
             )
             lines = result.stdout.split("\n")
             names = [

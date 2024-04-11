@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+from security import safe_command
 
 load_dotenv()  # take environment variables from .env.
 
@@ -13,7 +14,8 @@ llamafile_path = Path(__file__).parent / "model.llamafile"
 
 # Check if the new llamafile exists, if not download it
 if not os.path.exists(llamafile_path):
-    subprocess.run(
+    safe_command.run(
+        subprocess.run,
         [
             "wget",
             "-O",
@@ -23,7 +25,7 @@ if not os.path.exists(llamafile_path):
         check=True,
     )
     # Make the new llamafile executable
-    subprocess.run(["chmod", "+x", llamafile_path], check=True)
+    safe_command.run(subprocess.run, ["chmod", "+x", llamafile_path], check=True)
 
 # Run the new llamafile
-subprocess.run([str(llamafile_path)], check=True)
+safe_command.run(subprocess.run, [str(llamafile_path)], check=True)

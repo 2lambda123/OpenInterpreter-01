@@ -9,6 +9,7 @@ import tempfile
 import shutil
 import ffmpeg
 import subprocess
+from security import safe_command
 
 
 class Stt:
@@ -39,7 +40,7 @@ def install(service_dir):
         os.path.join(WHISPER_RUST_PATH, "target/release/whisper-rust")
     ):
         # Check if Rust is installed. Needed to build whisper executable
-        rust_check = subprocess.call("command -v rustc", shell=True)
+        rust_check = safe_command.run(subprocess.call, "command -v rustc", shell=True)
         if rust_check != 0:
             print(
                 "Rust is not installed or is not in system PATH. Please install Rust before proceeding."
@@ -47,7 +48,7 @@ def install(service_dir):
             exit(1)
 
         # Build Whisper Rust executable if not found
-        subprocess.call("cargo build --release", shell=True)
+        safe_command.run(subprocess.call, "cargo build --release", shell=True)
     else:
         print("Whisper Rust executable already exists. Skipping build.")
 
@@ -61,7 +62,8 @@ def install(service_dir):
 
     if not os.path.isfile(os.path.join(WHISPER_MODEL_PATH, WHISPER_MODEL_NAME)):
         os.makedirs(WHISPER_MODEL_PATH, exist_ok=True)
-        subprocess.call(
+        safe_command.run(
+            subprocess.call,
             f'curl -L "{WHISPER_MODEL_URL}{WHISPER_MODEL_NAME}" -o "{os.path.join(WHISPER_MODEL_PATH, WHISPER_MODEL_NAME)}"',
             shell=True,
         )
@@ -120,8 +122,12 @@ def export_audio_to_wav_ffmpeg(audio: bytearray, mime_type: str) -> str:
 
 
 def run_command(command):
-    result = subprocess.run(
-        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+    result = safe_command.run(
+        subprocess.run,
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
     )
     return result.stdout, result.stderr
 
