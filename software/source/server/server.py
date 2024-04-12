@@ -272,13 +272,12 @@ async def listener():
             accumulated_text = ""
 
             if any(
-                [m["type"] == "image" for m in messages]
-            ) and interpreter.llm.model.startswith("gpt-"):
+                m["type"] == "image" for m in messages) and interpreter.llm.model.startswith("gpt-"):
                 interpreter.llm.model = "gpt-4-vision-preview"
                 interpreter.llm.supports_vision = True
 
             for chunk in interpreter.chat(messages, stream=True, display=True):
-                if any([m["type"] == "image" for m in interpreter.messages]):
+                if any(m["type"] == "image" for m in interpreter.messages):
                     interpreter.llm.model = "gpt-4-vision-preview"
 
                 logger.debug("Got chunk:", chunk)
