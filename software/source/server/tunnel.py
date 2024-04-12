@@ -10,7 +10,7 @@ def create_tunnel(tunnel_method="ngrok", server_host="localhost", server_port=10
 
     if tunnel_method == "bore":
         try:
-            output = subprocess.check_output("command -v bore", shell=True)
+            output = subprocess.check_output("command -v bore", shell=False)
         except subprocess.CalledProcessError:
             print(
                 "The bore-cli command is not available. Please run 'cargo install bore-cli'."
@@ -86,7 +86,7 @@ def create_tunnel(tunnel_method="ngrok", server_host="localhost", server_port=10
     elif tunnel_method == "ngrok":
         # Check if ngrok is installed
         is_installed = (
-            subprocess.check_output("command -v ngrok", shell=True).decode().strip()
+            subprocess.check_output("command -v ngrok", shell=False).decode().strip()
         )
         if not is_installed:
             print("The ngrok command is not available.")
